@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as DemoVideoRouteImport } from './routes/demo-video'
 import { Route as ConversationsRouteImport } from './routes/conversations'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -31,6 +32,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoVideoRoute = DemoVideoRouteImport.update({
+  id: '/demo-video',
+  path: '/demo-video',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConversationsRoute = ConversationsRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/conversations': typeof ConversationsRoute
+  '/demo-video': typeof DemoVideoRoute
   '/insights': typeof InsightsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/conversations': typeof ConversationsRoute
+  '/demo-video': typeof DemoVideoRoute
   '/insights': typeof InsightsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/conversations': typeof ConversationsRoute
+  '/demo-video': typeof DemoVideoRoute
   '/insights': typeof InsightsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/confirmation'
     | '/conversations'
+    | '/demo-video'
     | '/insights'
     | '/onboarding'
     | '/sitemap.xml'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/confirmation'
     | '/conversations'
+    | '/demo-video'
     | '/insights'
     | '/onboarding'
     | '/sitemap.xml'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/confirmation'
     | '/conversations'
+    | '/demo-video'
     | '/insights'
     | '/onboarding'
     | '/sitemap.xml'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConfirmationRoute: typeof ConfirmationRoute
   ConversationsRoute: typeof ConversationsRoute
+  DemoVideoRoute: typeof DemoVideoRoute
   InsightsRoute: typeof InsightsRoute
   OnboardingRoute: typeof OnboardingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo-video': {
+      id: '/demo-video'
+      path: '/demo-video'
+      fullPath: '/demo-video'
+      preLoaderRoute: typeof DemoVideoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conversations': {
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConfirmationRoute: ConfirmationRoute,
   ConversationsRoute: ConversationsRoute,
+  DemoVideoRoute: DemoVideoRoute,
   InsightsRoute: InsightsRoute,
   OnboardingRoute: OnboardingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
