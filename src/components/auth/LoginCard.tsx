@@ -33,7 +33,7 @@ export function LoginCard() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate({ to: "/onboarding" });
+    navigate({ to: "/agent-l" });
   };
 
   const isStartup = userType === "startup";
