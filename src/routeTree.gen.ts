@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AgentProfileRouteImport } from './routes/agent-profile'
 import { Route as AgentLRouteImport } from './routes/agent-l'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -36,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentProfileRoute = AgentProfileRouteImport.update({
+  id: '/agent-profile',
+  path: '/agent-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentLRoute = AgentLRouteImport.update({
   id: '/agent-l',
   path: '/agent-l',
@@ -50,6 +56,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agent-l': typeof AgentLRoute
+  '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agent-l': typeof AgentLRoute
+  '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agent-l': typeof AgentLRoute
+  '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agent-l'
+    | '/agent-profile'
     | '/auth'
     | '/confirmation'
     | '/onboarding'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agent-l'
+    | '/agent-profile'
     | '/auth'
     | '/confirmation'
     | '/onboarding'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agent-l'
+    | '/agent-profile'
     | '/auth'
     | '/confirmation'
     | '/onboarding'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentLRoute: typeof AgentLRoute
+  AgentProfileRoute: typeof AgentProfileRoute
   AuthRoute: typeof AuthRoute
   ConfirmationRoute: typeof ConfirmationRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent-profile': {
+      id: '/agent-profile'
+      path: '/agent-profile'
+      fullPath: '/agent-profile'
+      preLoaderRoute: typeof AgentProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agent-l': {
       id: '/agent-l'
       path: '/agent-l'
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentLRoute: AgentLRoute,
+  AgentProfileRoute: AgentProfileRoute,
   AuthRoute: AuthRoute,
   ConfirmationRoute: ConfirmationRoute,
   OnboardingRoute: OnboardingRoute,

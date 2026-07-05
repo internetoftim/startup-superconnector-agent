@@ -1,173 +1,272 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { Rocket, TrendingUp, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
+import { ChatBubble } from "@/components/onboarding-chat/ChatBubble";
+import { TypingIndicator } from "@/components/onboarding-chat/TypingIndicator";
+import { QuickReplyChips } from "@/components/onboarding-chat/QuickReplyChips";
+import { ProgressIndicator } from "@/components/onboarding-chat/ProgressIndicator";
+import { Sparkles, ArrowRight, SendHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Onboarding — Superconnector" },
+      { title: "Onboarding — Superconnect" },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: OnboardingPage,
+  component: OnboardingChat,
 });
 
-type Role = "founder" | "investor";
+type UserType = "startup" | "investor";
 
-function OnboardingPage() {
+type Question = {
+  id: string;
+  prompt: string;
+  type: "text" | "choice";
+  options?: string[];
+  placeholder?: string;
+};
+
+const STARTUP_QUESTIONS: Question[] = [
+  {
+    id: "stage",
+    prompt: "First things first — what stage is your company at?",
+    type: "choice",
+    options: ["Pre-seed", "Seed", "Series A", "Series B+"],
+  },
+  {
+    id: "amount",
+    prompt: "How much are you looking to raise?",
+    type: "choice",
+    options: ["< $500K", "$500K–$2M", "$2M–$10M", "$10M+"],
+  },
+  {
+    id: "sector",
+    prompt: "What industry or sector are you building in?",
+    type: "text",
+    placeholder: "e.g. AI infrastructure, fintech, climate…",
+  },
+  {
+    id: "support",
+    prompt: "Beyond capital, what kind of support matters most to you?",
+    type: "choice",
+    options: ["Mentorship", "Intros to customers", "Hiring help", "Just capital"],
+  },
+  {
+    id: "pitch",
+    prompt: "Give me your one-line pitch — how would you describe what you do?",
+    type: "text",
+    placeholder: "We help X do Y so they can Z.",
+  },
+];
+
+const INVESTOR_QUESTIONS: Question[] = [
+  {
+    id: "stage",
+    prompt: "Which stages do you typically invest in?",
+    type: "choice",
+    options: ["Pre-seed", "Seed", "Series A", "Growth"],
+  },
+  {
+    id: "check",
+    prompt: "What's your typical check size?",
+    type: "choice",
+    options: ["< $100K", "$100K–$500K", "$500K–$2M", "$2M+"],
+  },
+  {
+    id: "sectors",
+    prompt: "Which sectors are you most excited about right now?",
+    type: "text",
+    placeholder: "e.g. AI, dev tools, consumer health…",
+  },
+  {
+    id: "handson",
+    prompt: "How hands-on do you like to be with portfolio companies?",
+    type: "choice",
+    options: ["Very hands-on", "Available when asked", "Mostly hands-off"],
+  },
+  {
+    id: "founder",
+    prompt: "What do you look for in a founder?",
+    type: "text",
+    placeholder: "Traits, background, signals you weight most…",
+  },
+];
+
+type Message =
+  | { id: string; role: "agent"; text: string }
+  | { id: string; role: "user"; text: string };
+
+function OnboardingChat() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(null);
-  const [role, setRole] = useState<Role>("founder");
-  const [name, setName] = useState("");
-  const [oneLiner, setOneLiner] = useState("");
-  const [profileLink, setProfileLink] = useState("");
-  const [rawText, setRawText] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [userType, setUserType] = useState<UserType>("startup");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [index, setIndex] = useState(0);
+  const [typing, setTyping] = useState(true);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [input, setInput] = useState("");
+  const [done, setDone] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const initedRef = useRef(false);
+
+  const questions = userType === "startup" ? STARTUP_QUESTIONS : INVESTOR_QUESTIONS;
+  const total = questions.length;
+  const current = questions[index];
+
+  // Load user type from login
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("sc:userType");
+      if (stored === "investor" || stored === "startup") setUserType(stored);
+    } catch {}
+  }, []);
+
+  // Kick off intro + first question
+  useEffect(() => {
+    if (initedRef.current) return;
+    initedRef.current = true;
+
+    const intro =
+      userType === "startup"
+        ? "Hey — I've got a good sense of who you are from your profile. Now I just need a bit more from you to know exactly what to look for."
+        : "Hey — I've read through your profile. Now let me ask a few questions so I know exactly what deals to bring you.";
+
+    const t1 = setTimeout(() => {
+      setMessages([{ id: "intro", role: "agent", text: intro }]);
+      setTyping(true);
+    }, 700);
+    const t2 = setTimeout(() => {
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        { id: `q-${questions[0].id}`, role: "agent", text: questions[0].prompt },
+      ]);
+    }, 2200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [userType, questions]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        navigate({ to: "/auth" });
-      } else {
-        setUserId(data.user.id);
-      }
-    });
-  }, [navigate]);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typing]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userId) return;
-    if (!name.trim() || !oneLiner.trim()) {
-      toast.error("Please fill in your name and one-liner.");
+  const advance = (answer: string) => {
+    setAnswers((a) => ({ ...a, [current.id]: answer }));
+    setMessages((m) => [...m, { id: `a-${current.id}`, role: "user", text: answer }]);
+    setInput("");
+
+    const nextIdx = index + 1;
+    if (nextIdx >= total) {
+      setTyping(true);
+      setTimeout(() => {
+        setTyping(false);
+        setMessages((m) => [
+          ...m,
+          {
+            id: "outro",
+            role: "agent",
+            text:
+              "Got it — I have a much clearer picture of what you're looking for now. Let me put together your agent profile.",
+          },
+        ]);
+        setDone(true);
+      }, 1200);
+      setIndex(nextIdx);
       return;
     }
-    setSaving(true);
-    try {
-      const { error } = await supabase.from("profiles").upsert({
-        id: userId,
-        role,
-        name: name.trim(),
-        one_liner: oneLiner.trim(),
-        profile_link: profileLink.trim() || null,
-        raw_text: rawText.trim() || null,
-      });
-      if (error) throw error;
-      navigate({ to: "/confirmation" });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to save profile";
-      toast.error(message);
-      setSaving(false);
-    }
+
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+      setMessages((m) => [
+        ...m,
+        { id: `q-${questions[nextIdx].id}`, role: "agent", text: questions[nextIdx].prompt },
+      ]);
+      setIndex(nextIdx);
+    }, 1000);
   };
 
-  const roleOptions: { value: Role; label: string; icon: React.ReactNode }[] = [
-    { value: "founder", label: "I'm a Founder", icon: <Rocket className="h-4 w-4" /> },
-    { value: "investor", label: "I'm an Investor", icon: <TrendingUp className="h-4 w-4" /> },
-  ];
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = input.trim();
+    if (!v || typing || done || !current) return;
+    advance(v);
+  };
+
+  const showChoices = !done && !typing && current?.type === "choice";
+  const showTextInput = !done && current?.type === "text";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-xl">
-        <div className="mb-6 flex items-center justify-center gap-2 text-sm font-semibold tracking-tight text-foreground">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          Superconnector
+    <main className="flex min-h-screen flex-col bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            Superconnect
+          </div>
+          <ProgressIndicator current={done ? total : index + 1} total={total} />
+        </div>
+      </header>
+
+      {/* Chat */}
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-6">
+        <div className="flex-1 space-y-4">
+          {messages.map((m) => (
+            <ChatBubble key={m.id} role={m.role}>
+              {m.text}
+            </ChatBubble>
+          ))}
+          {typing && (
+            <div className="flex items-end gap-2">
+              <div className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary/10">
+                <span className="text-xs text-primary">◆</span>
+              </div>
+              <TypingIndicator />
+            </div>
+          )}
+          <div ref={bottomRef} />
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Tell us about you
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your AI agent will use this to represent you.
-          </p>
+        {/* Input area */}
+        <div className="sticky bottom-0 mt-6 space-y-3 bg-background/80 pt-4 pb-6 backdrop-blur-md">
+          {showChoices && current && (
+            <QuickReplyChips options={current.options ?? []} onSelect={advance} />
+          )}
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-            <div className="space-y-2">
-              <Label>Your role</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {roleOptions.map((opt) => {
-                  const active = role === opt.value;
-                  return (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      onClick={() => setRole(opt.value)}
-                      className={cn(
-                        "flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-colors",
-                        active
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border bg-background text-foreground hover:bg-accent",
-                      )}
-                    >
-                      {opt.icon}
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
-              <Input
-                id="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="one-liner">One-liner</Label>
-              <Input
-                id="one-liner"
-                required
-                maxLength={150}
-                value={oneLiner}
-                onChange={(e) => setOneLiner(e.target.value)}
-                placeholder="What you do or what you invest in, in one sentence"
-              />
-              <p className="text-right text-xs text-muted-foreground">
-                {oneLiner.length}/150
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="profile-link">Pitch deck / profile link</Label>
-              <Input
-                id="profile-link"
-                type="url"
-                value={profileLink}
-                onChange={(e) => setProfileLink(e.target.value)}
-                placeholder="https://notion.so/... or LinkedIn URL"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="raw-text">Paste your pitch, thesis, or background here</Label>
-              <Textarea
-                id="raw-text"
-                rows={8}
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="Anything your agent should know — company overview, investment thesis, past experience, etc."
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={saving || !userId}>
-              {saving ? "Saving…" : "Create My Agent Profile"}
-            </Button>
-          </form>
+          {done ? (
+            <button
+              onClick={() => navigate({ to: "/agent-profile" })}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-opacity hover:opacity-90"
+            >
+              See my agent profile
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            showTextInput && (
+              <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                <input
+                  autoFocus
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={current?.placeholder ?? "Type your answer…"}
+                  disabled={typing}
+                  className="flex-1 rounded-full border border-border/60 bg-card/60 px-5 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 backdrop-blur-md focus:border-primary/60 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || typing}
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+                  aria-label="Send"
+                >
+                  <SendHorizontal className="h-4 w-4" />
+                </button>
+              </form>
+            )
+          )}
         </div>
       </div>
     </main>
