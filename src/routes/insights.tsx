@@ -13,7 +13,6 @@ import { RefinementRow } from "@/components/insights/RefinementRow";
 import { Sparkline } from "@/components/insights/Sparkline";
 
 export const Route = createFileRoute("/insights")({
-  codeSplitGroupings: [],
   head: () => ({
     meta: [
       { title: "Insights — Superconnect" },
