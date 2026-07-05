@@ -1,4 +1,4 @@
-import { AgentAvatar } from "@/components/agent-network/AgentAvatar";
+import { AgentAvatar } from "@/components/conversations/AgentAvatar";
 import type { Conversation } from "@/lib/conversations-data";
 
 const STATUS: Record<
