@@ -22,18 +22,18 @@ function Index() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <a
+            href="/auth"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Sign in
+          </a>
+          <a
             href="https://docs.lovable.dev"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Read the docs
-          </a>
-          <a
-            href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Start building
+            Read the docs
           </a>
         </div>
       </div>
