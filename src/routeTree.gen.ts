@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ConversationsRouteImport } from './routes/conversations'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentProfileRouteImport } from './routes/agent-profile'
@@ -28,6 +29,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConversationsRoute = ConversationsRouteImport.update({
+  id: '/conversations',
+  path: '/conversations',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/conversations.lazy').then((d) => d.Route))
 const ConfirmationRoute = ConfirmationRouteImport.update({
   id: '/confirmation',
   path: '/confirmation',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
+  '/conversations': typeof ConversationsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
+  '/conversations': typeof ConversationsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
+  '/conversations': typeof ConversationsRoute
   '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
+    | '/conversations'
     | '/onboarding'
     | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
+    | '/conversations'
     | '/onboarding'
     | '/sitemap.xml'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
+    | '/conversations'
     | '/onboarding'
     | '/sitemap.xml'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   AgentProfileRoute: typeof AgentProfileRoute
   AuthRoute: typeof AuthRoute
   ConfirmationRoute: typeof ConfirmationRoute
+  ConversationsRoute: typeof ConversationsRoute
   OnboardingRoute: typeof OnboardingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversations': {
+      id: '/conversations'
+      path: '/conversations'
+      fullPath: '/conversations'
+      preLoaderRoute: typeof ConversationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/confirmation': {
@@ -202,19 +222,10 @@ const rootRouteChildren: RootRouteChildren = {
   AgentProfileRoute: AgentProfileRoute,
   AuthRoute: AuthRoute,
   ConfirmationRoute: ConfirmationRoute,
+  ConversationsRoute: ConversationsRoute,
   OnboardingRoute: OnboardingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
