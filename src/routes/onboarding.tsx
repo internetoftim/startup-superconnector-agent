@@ -172,6 +172,12 @@ function OnboardingChat() {
           },
         ]);
         setDone(true);
+        try {
+          sessionStorage.setItem(
+            "sc:onboardingAnswers",
+            JSON.stringify({ userType, answers: { ...answers, [current.id]: answer } }),
+          );
+        } catch {}
       }, 1200);
       setIndex(nextIdx);
       return;
