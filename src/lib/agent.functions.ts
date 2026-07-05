@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 const SYSTEM_PROMPT = `You are extracting a structured profile from unstructured founder/investor text.
 
@@ -51,6 +50,7 @@ export const generateAgentProfile = createServerFn({ method: "POST" })
 
     const userMessage = `Role: ${profile.role}\nOne-liner: ${profile.one_liner}\n\nRaw text:\n${profile.raw_text ?? ""}`;
 
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
     const gateway = createLovableAiGatewayProvider(apiKey);
     const model = gateway("google/gemini-2.5-pro");
 
