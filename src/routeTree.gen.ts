@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AgentLRouteImport } from './routes/agent-l'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -35,6 +36,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentLRoute = AgentLRouteImport.update({
+  id: '/agent-l',
+  path: '/agent-l',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agent-l': typeof AgentLRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agent-l': typeof AgentLRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agent-l': typeof AgentLRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
   '/onboarding': typeof OnboardingRoute
@@ -65,12 +74,25 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/confirmation' | '/onboarding' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/agent-l'
+    | '/auth'
+    | '/confirmation'
+    | '/onboarding'
+    | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/confirmation' | '/onboarding' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/agent-l'
+    | '/auth'
+    | '/confirmation'
+    | '/onboarding'
+    | '/sitemap.xml'
   id:
     | '__root__'
     | '/'
+    | '/agent-l'
     | '/auth'
     | '/confirmation'
     | '/onboarding'
@@ -79,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgentLRoute: typeof AgentLRoute
   AuthRoute: typeof AuthRoute
   ConfirmationRoute: typeof ConfirmationRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -115,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent-l': {
+      id: '/agent-l'
+      path: '/agent-l'
+      fullPath: '/agent-l'
+      preLoaderRoute: typeof AgentLRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -127,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgentLRoute: AgentLRoute,
   AuthRoute: AuthRoute,
   ConfirmationRoute: ConfirmationRoute,
   OnboardingRoute: OnboardingRoute,
