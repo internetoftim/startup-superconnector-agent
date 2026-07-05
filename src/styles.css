@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme inline {
+  --color-accent-glow: var(--accent-glow);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
 /*
  * Design system definition.
  *
