@@ -36,7 +36,7 @@ export function LoginCard() {
     try {
       localStorage.setItem("sc:userType", userType);
     } catch {}
-    navigate({ to: "/conversations" });
+    navigate({ to: "/onboarding" });
   };
 
   const isStartup = userType === "startup";

@@ -8,12 +8,15 @@ import { GuideAgentPanel } from "./GuideAgentPanel";
 import type { Conversation, Message } from "@/lib/conversations-data";
 import { MY_AGENT } from "@/lib/conversations-data";
 
+type MyAgent = { name: string; human: string; role: string; hue: number };
+
 type Props = {
   conversation: Conversation;
   onBack?: () => void;
+  myAgent?: MyAgent;
 };
 
-export function TranscriptView({ conversation, onBack }: Props) {
+export function TranscriptView({ conversation, onBack, myAgent = MY_AGENT }: Props) {
   const [live, setLive] = useState<Message[]>([]);
   const [typing, setTyping] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -79,16 +82,16 @@ export function TranscriptView({ conversation, onBack }: Props) {
             </button>
           )}
           <div className="flex items-center gap-1.5">
-            <AgentAvatar hue={MY_AGENT.hue} size={32} />
+            <AgentAvatar hue={myAgent.hue} size={32} />
             <div className="h-px w-6 bg-gradient-to-r from-primary/60 to-transparent" />
             <AgentAvatar hue={conversation.otherHue} size={32} pulse={conversation.status === "talking"} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-foreground">
-              {MY_AGENT.name} × {conversation.otherAgentName}
+              {myAgent.name} × {conversation.otherAgentName}
             </div>
             <div className="truncate text-[11px] text-muted-foreground">
-              {MY_AGENT.human} · {conversation.otherHuman} ({conversation.otherRole})
+              {myAgent.human} · {conversation.otherHuman} ({conversation.otherRole})
             </div>
           </div>
           <div className="hidden items-center gap-3 md:flex">
@@ -126,10 +129,10 @@ export function TranscriptView({ conversation, onBack }: Props) {
             <div key={m.id} className="flex flex-col gap-2">
               <AgentBubble
                 from={m.from}
-                name={m.from === "mine" ? MY_AGENT.name : conversation.otherAgentName}
+                name={m.from === "mine" ? myAgent.name : conversation.otherAgentName}
                 text={m.text}
                 time={m.time}
-                hue={m.from === "mine" ? MY_AGENT.hue : conversation.otherHue}
+                hue={m.from === "mine" ? myAgent.hue : conversation.otherHue}
               />
               {m.insight && (
                 <div className="flex justify-center">
@@ -152,7 +155,7 @@ export function TranscriptView({ conversation, onBack }: Props) {
             </div>
           )}
 
-          {showProposal && <MeetingProposalCard conversation={conversation} />}
+          {showProposal && <MeetingProposalCard conversation={conversation} myAgent={myAgent} />}
         </div>
       </div>
 

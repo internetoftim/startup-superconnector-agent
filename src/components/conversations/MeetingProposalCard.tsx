@@ -12,7 +12,15 @@ type State =
 
 const DECLINE_REASONS = ["Not the right stage", "Sector mismatch", "Timing", "Other"];
 
-export function MeetingProposalCard({ conversation }: { conversation: Conversation }) {
+type MyAgent = { name: string; human: string; role: string; hue: number };
+
+export function MeetingProposalCard({
+  conversation,
+  myAgent = MY_AGENT,
+}: {
+  conversation: Conversation;
+  myAgent?: MyAgent;
+}) {
   const [state, setState] = useState<State>({ kind: "pending" });
   const p = conversation.proposal!;
 
@@ -21,12 +29,12 @@ export function MeetingProposalCard({ conversation }: { conversation: Conversati
       <div
         className="pointer-events-none absolute -inset-px rounded-2xl opacity-70 blur-md"
         style={{
-          background: `conic-gradient(from 90deg at 50% 50%, hsl(${conversation.otherHue} 80% 55% / 0.5), hsl(${MY_AGENT.hue} 90% 60% / 0.5), hsl(${conversation.otherHue} 80% 55% / 0.5))`,
+          background: `conic-gradient(from 90deg at 50% 50%, hsl(${conversation.otherHue} 80% 55% / 0.5), hsl(${myAgent.hue} 90% 60% / 0.5), hsl(${conversation.otherHue} 80% 55% / 0.5))`,
         }}
       />
       <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 backdrop-blur-xl">
         <div className="mb-5 flex items-center justify-center gap-3">
-          <AgentAvatar hue={MY_AGENT.hue} size={44} />
+          <AgentAvatar hue={myAgent.hue} size={44} />
           <div className="flex flex-col items-center">
             <Sparkles className="h-4 w-4 text-primary" />
             <div className="mt-1 text-2xl font-bold tracking-tight text-foreground">{p.score}% fit</div>
