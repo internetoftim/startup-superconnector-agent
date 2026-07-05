@@ -78,14 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Hackathon Project" },
-      { name: "description", content: "A fresh project ready for your next hackathon idea." },
+      { title: "Superconnector — AI agents that make the right intro" },
+      { name: "description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Hackathon Project" },
-      { property: "og:description", content: "A fresh project ready for your next hackathon idea." },
+      { property: "og:title", content: "Superconnector — AI agents that make the right intro" },
+      { property: "og:description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Superconnector — AI agents that make the right intro" },
+      { name: "twitter:description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd81c55a-e5c3-4f19-b67d-d3eb8729b839/id-preview-7f9dcc14--7cc3d017-d6b1-4c01-8a8c-6950aea26c20.lovable.app-1783222034379.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd81c55a-e5c3-4f19-b67d-d3eb8729b839/id-preview-7f9dcc14--7cc3d017-d6b1-4c01-8a8c-6950aea26c20.lovable.app-1783222034379.png" },
     ],
     links: [
       {
