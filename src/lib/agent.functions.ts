@@ -32,7 +32,7 @@ function stripFences(text: string): string {
 
 export const generateAgentProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({}).parse(input ?? {}))
+  .validator((input: unknown) => z.object({}).parse(input ?? {}))
   .handler(async ({ context }) => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
