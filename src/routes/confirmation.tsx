@@ -19,14 +19,12 @@ export const Route = createFileRoute("/confirmation")({
 function ConfirmationPage() {
   const generate = useServerFn(generateAgentProfile);
   const [loading, setLoading] = useState(false);
-  const [agent, setAgent] = useState<Record<string, unknown> | null>(null);
+  const [agent, setAgent] = useState<Record<string, string | string[]> | null>(null);
 
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const result = (await generate({ data: {} })) as {
-        agentProfile: Record<string, unknown>;
-      };
+      const result = await generate({ data: {} });
       setAgent(result.agentProfile);
       toast.success("Your agent is ready");
     } catch (err) {

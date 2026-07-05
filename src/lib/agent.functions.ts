@@ -60,7 +60,7 @@ export const generateAgentProfile = createServerFn({ method: "POST" })
       prompt: userMessage,
     });
 
-    let agentProfile: Record<string, unknown>;
+    let agentProfile: Record<string, string | string[]>;
     try {
       agentProfile = JSON.parse(stripFences(text));
     } catch {
