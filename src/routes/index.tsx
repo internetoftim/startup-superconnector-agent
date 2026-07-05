@@ -1,24 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Hackathon Project" },
+      { name: "description", content: "A fresh project ready for your next hackathon idea." },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
+      <div className="max-w-xl space-y-6">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          Hackathon Project
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          A blank canvas for your next big idea. Start building something amazing.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="https://docs.lovable.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Read the docs
+          </a>
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Start building
+          </a>
+        </div>
+      </div>
+    </main>
   );
 }
