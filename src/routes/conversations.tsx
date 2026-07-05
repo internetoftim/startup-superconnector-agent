@@ -5,7 +5,6 @@ import { ConversationList } from "@/components/conversations/ConversationList";
 import { TranscriptView } from "@/components/conversations/TranscriptView";
 
 export const Route = createFileRoute("/conversations")({
-  codeSplitGroupings: [],
   head: () => ({
     meta: [
       { title: "My Agent's Conversations — Superconnect" },
