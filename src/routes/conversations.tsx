@@ -1,6 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { CONVERSATIONS } from "@/lib/conversations-data";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { TranscriptView } from "@/components/conversations/TranscriptView";
