@@ -33,6 +33,9 @@ export function LoginCard() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
+    try {
+      localStorage.setItem("sc:userType", userType);
+    } catch {}
     navigate({ to: "/agent-l" });
   };
 
