@@ -90,18 +90,26 @@ export class ProxyAgent {
 
   /**
    * FR-4 — mandate-bounded autonomy. Matches the action against the
-   * principal's own may-commit / must-escalate wording. Escalation wins ties,
-   * and NO match at all also escalates: ambiguity always resolves to the
-   * human (Product Principle 2). Every decision is written to the audit log.
+   * principal's own may-commit / must-escalate wording AND the profile's
+   * hard-no guardrails (US-2: guardrails checked on every outbound
+   * commitment). Blocking rules win ties, and NO match at all also escalates:
+   * ambiguity always resolves to the human (Product Principle 2). A profile
+   * whose phrasing the matcher doesn't recognise therefore degrades to
+   * escalation, never to autonomy. Every decision lands in the audit log.
    */
   decide(action: ActionRequest): Decision {
     const mandate = this.profile.principal.agent_mandate;
     const may = bestRule(mandate.may_commit_autonomously, action.keywords);
     const esc = bestRule(mandate.must_escalate, action.keywords);
+    const hardNo = bestRule(this.profile.guardrails.hard_no, action.keywords);
+    const blocking =
+      hardNo.score > esc.score
+        ? { ...hardNo, source: "hard_no" as const }
+        : { ...esc, source: "must_escalate" as const };
 
     let result: Decision;
-    if (esc.score > 0 && esc.score >= may.score) {
-      result = { decision: "escalate", matchedRule: esc.rule, ruleSource: "must_escalate" };
+    if (blocking.score > 0 && blocking.score >= may.score) {
+      result = { decision: "escalate", matchedRule: blocking.rule, ruleSource: blocking.source };
     } else if (may.score > 0) {
       result = {
         decision: "autonomous",
@@ -149,6 +157,13 @@ export class ProxyAgent {
     seeking?: string[];
   } {
     const p = this.profile.principal;
+    const raise = this.profile.raise;
+    const thesis = this.profile.thesis_filter;
+    // Explicit precedence for a profile carrying both facets: what the
+    // principal actively seeks (the raise) outranks how they screen inbound.
+    const sector = raise?.sector ?? (thesis ? thesis.sectors.join("/") : undefined);
+    const seeking =
+      raise?.wants_investor_traits ?? (thesis ? [thesis.wants_from_matchmaker] : undefined);
     return {
       principal: p.name,
       ...(p.company ? { company: p.company } : {}),
@@ -156,14 +171,8 @@ export class ProxyAgent {
       ...(p.public_oneliner ? { oneliner: p.public_oneliner } : {}),
       ...(p.traction_headline ? { traction: p.traction_headline } : {}),
       ...(p.stage ? { stage: p.stage } : {}),
-      ...(this.profile.raise ? { sector: this.profile.raise.sector } : {}),
-      ...(this.profile.raise ? { seeking: this.profile.raise.wants_investor_traits } : {}),
-      ...(this.profile.thesis_filter
-        ? {
-            sector: this.profile.thesis_filter.sectors.join("/"),
-            seeking: [this.profile.thesis_filter.wants_from_matchmaker],
-          }
-        : {}),
+      ...(sector ? { sector } : {}),
+      ...(seeking ? { seeking } : {}),
     };
   }
 
@@ -196,26 +205,45 @@ export class ProxyAgent {
   }
 }
 
+function tokensOf(text: string): Set<string> {
+  return new Set(
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9-]+/)
+      .filter((t) => t.length > 1),
+  );
+}
+
+/**
+ * Whole-token term matching: every token of the term must appear as a token
+ * of the text. Substring containment is NOT enough — a thesis sector "ai"
+ * must not match a candidate sector "retail".
+ */
+function textMatchesTerm(text: string, term: string): boolean {
+  const textTokens = tokensOf(text);
+  const termTokens = [...tokensOf(term)];
+  return termTokens.length > 0 && termTokens.every((t) => textTokens.has(t));
+}
+
 function applyThesisFilter(filter: ThesisFilter, fit: CuratedFit): ScreenVerdict {
   const reasons: string[] = [];
   let pass = true;
 
-  const fitSectors = fit.sector.toLowerCase();
-  const sectorHit = filter.sectors.find((s) => fitSectors.includes(s.toLowerCase()));
+  const sectorHit = filter.sectors.find((s) => textMatchesTerm(fit.sector, s));
   if (sectorHit) reasons.push(`sector "${fit.sector}" matches thesis sector "${sectorHit}"`);
   else {
     pass = false;
     reasons.push(`sector "${fit.sector}" outside thesis [${filter.sectors.join(", ")}]`);
   }
 
-  const stageHit = filter.stage.find((s) => fit.stage.toLowerCase().includes(s.toLowerCase()));
+  const stageHit = filter.stage.find((s) => textMatchesTerm(fit.stage, s));
   if (stageHit) reasons.push(`stage "${fit.stage}" matches "${stageHit}"`);
   else {
     pass = false;
     reasons.push(`stage "${fit.stage}" outside thesis [${filter.stage.join(", ")}]`);
   }
 
-  const geoHit = filter.geo.find((g) => fit.geo.toLowerCase().includes(g.toLowerCase()));
+  const geoHit = filter.geo.find((g) => textMatchesTerm(fit.geo, g));
   if (geoHit) reasons.push(`geo "${fit.geo}" matches "${geoHit}"`);
   else {
     pass = false;
@@ -224,9 +252,11 @@ function applyThesisFilter(filter: ThesisFilter, fit: CuratedFit): ScreenVerdict
 
   const description = `${fit.oneliner} ${fit.sector} ${fit.stage}`.toLowerCase();
   for (const hp of filter.hard_pass) {
-    // Hard-pass entries are phrases like "later than Series A"; match on their
-    // distinctive tokens so "series b saas" trips "later than Series A"-adjacent
-    // rules only when the phrase itself appears.
+    // Literal-phrase guard: an entry fires only when the phrase itself appears
+    // in the candidate's public text (e.g. "pure software SaaS"). Judgment
+    // entries like "later than Series A" rely on the stage/sector gates above —
+    // string matching cannot infer ordering semantics, and pretending it could
+    // would manufacture silent false negatives.
     if (description.includes(hp.toLowerCase())) {
       pass = false;
       reasons.push(`hard pass: "${hp}"`);

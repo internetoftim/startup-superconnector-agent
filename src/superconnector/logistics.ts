@@ -8,6 +8,7 @@
  */
 import type { RepresentationProfile } from "./profile.ts";
 import type { SignedAgreement } from "./agreement.ts";
+import { CONSENT_BOUNDARY_NOTE } from "./agreement.ts";
 
 export interface CalendarHold {
   title: string;
@@ -67,7 +68,7 @@ export function executeLogistics(
     body: [
       `${investorName}, meet ${founderName}.`,
       ``,
-      ...founderDisclosures.filter((d) => !d.startsWith("nothing else")).map((d) => `- ${d}`),
+      ...founderDisclosures.filter((d) => d !== CONSENT_BOUNDARY_NOTE).map((d) => `- ${d}`),
       ``,
       `You're both confirmed for ${when} (15 minutes, in person).`,
       `Anything not listed above hasn't been shared — and won't be without an explicit opt-in.`,

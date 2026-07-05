@@ -82,6 +82,20 @@ export function demoSecretFor(principal: string): string {
   return `superconnector-demo-hmac-key:${principal}`;
 }
 
+/**
+ * The consent-boundary note appended to the founder's disclosure list. Shared
+ * with logistics.ts, which must not treat the meta-line as a disclosure.
+ */
+export const CONSENT_BOUNDARY_NOTE = "nothing else — deck & metrics pending explicit opt-in";
+
+/** Constant-time hex comparison — no early exit on the first differing byte. */
+function timingSafeEqualHex(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 export interface BuildAgreementInput {
   founder: ProxyAgent;
   investor: ProxyAgent;
@@ -98,6 +112,8 @@ export function buildAgreement(input: BuildAgreementInput): TriPartyAgreement {
   const { founder, investor, matchmaker, fit, slot, transcript, escalations } = input;
   const founderSummary = founder.publicSummary();
   const investorSummary = investor.publicSummary();
+  const investorThesis = investor.profile.thesis_filter;
+  const venue = matchmaker.profile.offerings?.event_access?.event;
 
   return {
     id: `sc-intro-${slot.replace(/[^0-9A-Za-z]+/g, "").toLowerCase()}-${founder.principalName.replace(/\W+/g, "").toLowerCase()}-${investor.principalName.replace(/\W+/g, "").toLowerCase()}`,
@@ -114,18 +130,24 @@ export function buildAgreement(input: BuildAgreementInput): TriPartyAgreement {
     },
     meeting: {
       when: slot,
-      format: "in person, 15 minutes",
+      format: `in person, 15 minutes${venue ? ` — ${venue}` : ""}`,
       duration: "15m",
     },
     consented_disclosures: {
       [founder.principalName]: [
         ...(founderSummary.oneliner ? [`public one-liner: "${founderSummary.oneliner}"`] : []),
         ...(founderSummary.traction ? [`traction headline: "${founderSummary.traction}"`] : []),
-        "nothing else — deck & metrics pending explicit opt-in",
+        CONSENT_BOUNDARY_NOTE,
       ],
       [investor.principalName]: [
         ...(investorSummary.oneliner ? [`public thesis: "${investorSummary.oneliner}"`] : []),
-        `public thesis: invests at ${fit.stage.includes("seed") ? "seed" : fit.stage} in ${fit.sector}`,
+        // The investor's disclosure is the investor's OWN public thesis, read
+        // from their profile — never inferred from the founder's ask.
+        ...(investorThesis
+          ? [
+              `public thesis: ${investorThesis.sectors.join("/")} @ ${investorThesis.stage.join("/")} in ${investorThesis.geo.join("/")}`,
+            ]
+          : []),
         "single mutually-open slot only — full calendar never shared",
       ],
     },
@@ -135,7 +157,7 @@ export function buildAgreement(input: BuildAgreementInput): TriPartyAgreement {
       principal: e.principal,
       question: e.question,
     })),
-    audit_note: `${transcript.messages.length} messages, ${transcript.guardrailHits().length} guardrail enforcements, ${escalations.length} escalations — full transcript auditable by all three principals.`,
+    audit_note: `${transcript.messages.length} messages, ${new Set(transcript.guardrailHits().map((m) => `${m.guardrail?.kind}@${m.step}`)).size} distinct guardrail enforcements, ${escalations.length} escalations — full transcript auditable by all three principals.`,
   };
 }
 
@@ -155,10 +177,18 @@ export async function signAgreement(agreement: TriPartyAgreement): Promise<Signe
 
 /** All three signatures must verify against the canonical document. */
 export async function verifyAgreement(signed: SignedAgreement): Promise<boolean> {
+  const parties = signed.agreement.parties;
+  // A tri-party agreement without three distinctly-named parties has no
+  // trust value — an empty or deduplicated party list must NOT verify
+  // "vacuously true", and a stray signature is as suspect as a missing one.
+  if (parties.length < 3) return false;
+  if (new Set(parties.map((p) => p.principal)).size !== parties.length) return false;
+  if (Object.keys(signed.signatures).length !== parties.length) return false;
+
   const canonical = canonicalJson(signed.agreement);
-  for (const party of signed.agreement.parties) {
+  for (const party of parties) {
     const expected = await hmacSha256Hex(demoSecretFor(party.principal), canonical);
-    if (signed.signatures[party.principal] !== expected) return false;
+    if (!timingSafeEqualHex(signed.signatures[party.principal] ?? "", expected)) return false;
   }
   return true;
 }

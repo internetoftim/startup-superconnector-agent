@@ -32,8 +32,7 @@ export type GuardrailKind =
   | "consent_withheld" // private founder data (deck/metrics) not shared without opt-in
   | "availability_protected" // full calendars stay with the broker; only the mutual slot crosses
   | "contact_withheld" // non-opted-in network parties never surfaced
-  | "vouch_refused" // no outcome assurances; vouch on fit/timeline only
-  | "mandate_escalation"; // action above an agent's authority → human
+  | "vouch_refused"; // no outcome assurances; vouch on fit/timeline only
 
 export interface GuardrailAnnotation {
   kind: GuardrailKind;
@@ -71,7 +70,12 @@ export interface AuditEntry {
   decision: "autonomous" | "escalate" | "enforced";
   /** The mandate rule (principal's own words) that matched, if any. */
   matchedRule: string | null;
-  ruleSource: "may_commit_autonomously" | "must_escalate" | "default_escalate" | "guardrail";
+  ruleSource:
+    | "may_commit_autonomously"
+    | "must_escalate"
+    | "hard_no"
+    | "default_escalate"
+    | "guardrail";
 }
 
 /** A commitment an agent made autonomously — must always trace to a mandate rule. */
@@ -118,11 +122,6 @@ export class Transcript {
   commit(c: Commitment): Commitment {
     this.commitments.push(c);
     return c;
-  }
-
-  /** All messages a given agent was allowed to see (sent or received). */
-  visibleTo(agent: AgentId): A2AMessage[] {
-    return this.messages.filter((m) => m.from === agent || m.to === agent);
   }
 
   guardrailHits(): A2AMessage[] {

@@ -50,14 +50,14 @@ against the same representation-profile schema (identity + mandate +
 offer/seek + guardrails), and the same `ProxyAgent` engine runs all three. A
 new role is a new profile, not new code.
 
-| Module | Requirement | What it does |
-| --- | --- | --- |
-| `src/superconnector/profile.ts` | FR-1 | one zod schema + validation for all roles |
-| `src/superconnector/agent.ts` | FR-2 | generic proxy engine: mandate, consent allowlist serializer, escalation |
-| `src/superconnector/broker.ts` | FR-3, FR-4.4 | matchmaker hub loop: curate → dual-consent → relay → converge/escalate |
-| `src/superconnector/agreement.ts` | FR-5 | HMAC-signed tri-party agreement + human-readable render |
-| `src/superconnector/logistics.ts` | FR-6 | Beat B: calendar hold, drafted email, seat (mocked) |
-| `src/superconnector/run-demo.ts` | — | deterministic orchestration of `seed/negotiation_scenario.json` |
+| Module                            | Requirement  | What it does                                                            |
+| --------------------------------- | ------------ | ----------------------------------------------------------------------- |
+| `src/superconnector/profile.ts`   | FR-1         | one zod schema + validation for all roles                               |
+| `src/superconnector/agent.ts`     | FR-2         | generic proxy engine: mandate, consent allowlist serializer, escalation |
+| `src/superconnector/broker.ts`    | FR-3, FR-4.4 | matchmaker hub loop: curate → dual-consent → relay → converge/escalate  |
+| `src/superconnector/agreement.ts` | FR-5         | HMAC-signed tri-party agreement + human-readable render                 |
+| `src/superconnector/logistics.ts` | FR-6         | Beat B: calendar hold, drafted email, seat (mocked)                     |
+| `src/superconnector/run-demo.ts`  | —            | deterministic orchestration of `seed/negotiation_scenario.json`         |
 
 ## Honesty labels
 
@@ -69,6 +69,13 @@ new role is a new profile, not new code.
   `gmail.compose` (drafts a human reviews) — never unsolicited sends.
 - The discovery interview grounding the problem is **a signal, not
   validation**.
+- Mandate matching is **keyword-scored over the principal's own wording** with
+  a hard default: unrecognised phrasing degrades to escalation, never to
+  autonomy. A mandate DSL replaces it at P1.
+- Known P0 simplifications: structured counter-proposals (alternate slots or
+  terms relayed spoke-to-spoke) and check-size screening land at P1 — today a
+  decline/withhold/refusal always routes through escalation, and asks carry no
+  raise amount to screen against.
 
 ## Web app
 

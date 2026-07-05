@@ -104,6 +104,70 @@ describe("mandate-bounded autonomy (FR-4)", () => {
     expect(d.matchedRule).toContain("deck");
   });
 
+  test("investor agent escalates any 'will you invest' / commitment question (US-5)", () => {
+    const t = new Transcript();
+    const investor = new ProxyAgent(investorProfile, "investor-agent", t);
+    const d = investor.decide({
+      topic: "assure_investment",
+      summary: "assure the founder that Aya will invest",
+      keywords: ["will Aya invest", "assurance", "committing to invest"],
+    });
+    expect(d.decision).toBe("escalate");
+    expect(d.matchedRule).not.toBeNull();
+  });
+
+  test("founder agent never auto-commits to amount, valuation, or terms (US-4)", () => {
+    const t = new Transcript();
+    const founder = new ProxyAgent(founderProfile, "founder-agent", t);
+    const d = founder.decide({
+      topic: "commit_terms",
+      summary: "commit to a valuation and round terms",
+      keywords: ["committing to terms", "valuation", "amount"],
+    });
+    expect(d.decision).toBe("escalate");
+    expect(d.ruleSource).toBe("must_escalate");
+  });
+
+  test("guardrails.hard_no blocks even when no must-escalate rule matches (US-2)", () => {
+    const t = new Transcript();
+    const founder = new ProxyAgent(founderProfile, "founder-agent", t);
+    const d = founder.decide({
+      topic: "auto_commit_raise",
+      summary: "auto-commit to a raise amount",
+      keywords: ["auto-committing to a raise amount"],
+    });
+    expect(d.decision).toBe("escalate");
+    expect(d.ruleSource).toBe("hard_no");
+    expect(d.matchedRule).toContain("auto-committing");
+  });
+
+  test("thesis sector matching is whole-token — 'ai' must not match 'retail'", () => {
+    const t = new Transcript();
+    const aiInvestor = {
+      ...(investorProfile as Record<string, unknown>),
+      thesis_filter: {
+        sectors: ["ai"],
+        stage: ["seed"],
+        geo: ["APAC"],
+        check_size: "$100k",
+        hard_pass: [],
+        wants_from_matchmaker: "pre-vetted fit",
+      },
+    };
+    const investor = new ProxyAgent(aiInvestor, "investor-agent", t);
+    const verdict = investor.screenOffer({
+      candidateName: "Retail Rick",
+      oneliner: "retail analytics dashboards",
+      sector: "retail",
+      stage: "seed",
+      geo: "APAC",
+      wants: [],
+      vouch: "n/a",
+    });
+    expect(verdict.pass).toBe(false);
+    expect(verdict.reasons.join("; ")).toContain('sector "retail" outside thesis');
+  });
+
   test("ambiguity resolves to escalation, never to autonomy (Principle 2)", () => {
     const t = new Transcript();
     const investor = new ProxyAgent(investorProfile, "investor-agent", t);

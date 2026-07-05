@@ -25,8 +25,9 @@ const blue = paint("34");
 const magenta = paint("35");
 const cyan = paint("36");
 
-const HUB = "matchmaker";
-const laneName = (id: string) => (id === HUB ? magenta(bold("[MATCHMAKER]")) : cyan(id));
+// Resolved from the run result in main() — never assumed.
+let hubId = "";
+const laneName = (id: string) => (id === hubId ? magenta(bold(`[${id.toUpperCase()}]`)) : cyan(id));
 
 const STEP_TITLES: Record<number, string> = {
   1: "founder-agent → matchmaker: consented ask (public info ONLY)",
@@ -83,6 +84,7 @@ async function main(): Promise<void> {
     { withLogistics },
   );
 
+  hubId = result.agents.matchmaker.id;
   const cards = [result.agents.founder, result.agents.matchmaker, result.agents.investor].map((a) =>
     a.card(),
   );

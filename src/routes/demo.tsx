@@ -39,17 +39,21 @@ const GUARDRAIL_LABELS: Record<string, string> = {
   availability_protected: "calendar protected",
   contact_withheld: "contact never surfaced",
   vouch_refused: "vouch bounded",
-  mandate_escalation: "escalated to human",
 };
 
-function laneOf(m: A2AMessage): "founder" | "hub" | "investor" {
-  if (m.from === "founder-agent" || m.to === "founder-agent") return "founder";
-  if (m.from === "investor-agent" || m.to === "investor-agent") return "investor";
+interface Lanes {
+  founder: string;
+  investor: string;
+}
+
+function laneOf(m: A2AMessage, lanes: Lanes): "founder" | "hub" | "investor" {
+  if (m.from === lanes.founder || m.to === lanes.founder) return "founder";
+  if (m.from === lanes.investor || m.to === lanes.investor) return "investor";
   return "hub";
 }
 
-function MessageRow({ m }: { m: A2AMessage }) {
-  const lane = laneOf(m);
+function MessageRow({ m, lanes }: { m: A2AMessage; lanes: Lanes }) {
+  const lane = laneOf(m, lanes);
   const align =
     lane === "founder"
       ? "md:mr-auto md:pr-16"
@@ -62,7 +66,7 @@ function MessageRow({ m }: { m: A2AMessage }) {
       <div className="rounded-lg border bg-card p-3 text-card-foreground shadow-sm">
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {internal ? (
-            <span className="font-mono">[matchmaker] internal</span>
+            <span className="font-mono">[{m.from}] internal</span>
           ) : (
             <span className="font-mono">
               {m.from} <span className="text-primary">─{m.performative}→</span> {m.to}
@@ -127,6 +131,7 @@ function DemoPage() {
     steps.set(m.step, bucket);
   }
   const s = result.scorecard;
+  const lanes: Lanes = { founder: result.agents.founder.id, investor: result.agents.investor.id };
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground">
@@ -149,9 +154,15 @@ function DemoPage() {
             two spokes — the founder&apos;s and investor&apos;s agents never talk directly.
           </p>
           <div className="flex flex-wrap gap-2 pt-1 font-mono text-xs">
-            <Badge variant="outline">founder-agent · Rin</Badge>
-            <Badge>» matchmaker · Tim (SSC) «</Badge>
-            <Badge variant="outline">investor-agent · Aya N.</Badge>
+            <Badge variant="outline">
+              {result.agents.founder.id} · {result.agents.founder.principalName}
+            </Badge>
+            <Badge>
+              » {result.agents.matchmaker.id} · {result.agents.matchmaker.principalName} «
+            </Badge>
+            <Badge variant="outline">
+              {result.agents.investor.id} · {result.agents.investor.principalName}
+            </Badge>
           </div>
         </header>
 
@@ -186,7 +197,7 @@ function DemoPage() {
             </h2>
             <div className="space-y-3">
               {messages.map((m) => (
-                <MessageRow key={m.seq} m={m} />
+                <MessageRow key={m.seq} m={m} lanes={lanes} />
               ))}
             </div>
           </section>

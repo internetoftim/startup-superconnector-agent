@@ -116,8 +116,14 @@ export class MatchmakerBroker {
       // A contact working IN the ask's sector outranks one that merely shares
       // vocabulary with it — curation must not hinge on network ordering.
       const domainFit = tokenOverlap(ask.sector.toLowerCase(), contact.domain.toLowerCase());
+      // The matchmaker's own prioritise guardrails nudge curation toward the
+      // people their principal cares about (e.g. "deep-tech founders").
+      const prioritised = this.agent.profile.guardrails.prioritise.filter(
+        (p) => tokenOverlap(p.toLowerCase(), contactText) > 0,
+      ).length;
       const score =
         domainFit * 3 +
+        prioritised +
         tokenOverlap(askText, contactText) +
         (contact.warmth === "strong" ? 2 : contact.warmth === "medium" ? 1 : 0);
       // Confirm the contact is actually SEEKING what the ask offers before
@@ -127,11 +133,14 @@ export class MatchmakerBroker {
     }
 
     if (withheldCount > 0) {
+      // Structural enforcement, not a mandate decision — but if the
+      // principal's own wording covers it, trace to it rather than invent one.
+      const mandate = this.agent.profile.principal.agent_mandate;
       this.transcript.recordAudit({
         agent: this.agent.id,
         action: `curation: ${withheldCount} network contact(s) excluded before matching — no intro opt-in; never surfaced`,
         decision: "enforced",
-        matchedRule: "sharing a contact's private details without their opt-in",
+        matchedRule: mandate.must_escalate.find((r) => r.includes("opt-in")) ?? null,
         ruleSource: "guardrail",
       });
     }
@@ -213,7 +222,11 @@ export class MatchmakerBroker {
     const decision = spoke.decide({
       topic: "accept_curated_intro",
       summary: `accept curated intro to ${fit.candidateName} via trusted matchmaker`,
-      keywords: ["accept curated intros", "thesis filter", "trusted matchmaker"],
+      // Phrasing-neutral action vocabulary: matches "accept curated intros …
+      // via a trusted matchmaker" (investor seed) as well as "accept a warm
+      // intro to a thesis-fit investor" (founder seed) — the hub method stays
+      // role-generic.
+      keywords: ["accept", "curated intro", "warm intro", "thesis-fit", "trusted matchmaker"],
     });
     if (decision.decision === "autonomous" && decision.matchedRule) {
       this.transcript.commit({
@@ -274,20 +287,43 @@ export class MatchmakerBroker {
       body: `${requester.principalName}'s agent asks for the ${what} before the meeting.`,
     });
 
+    // Phrasing-neutral action vocabulary — the decision rides on the DATA
+    // OWNER's own mandate/guardrail wording, not on a role-specific list
+    // baked into the hub.
     const decision = dataOwner.decide({
       topic: `share_${what.replace(/\s+/g, "_")}`,
       summary: `share the ${what} with ${requester.principalName}`,
-      keywords: ["sharing the deck", "detailed metrics", "cap table", what],
+      keywords: [`sharing the ${what}`, what, "share"],
     });
 
-    if (decision.decision === "autonomous") {
-      // Not reachable with the seeded consent state; kept for engine generality.
+    if (decision.decision === "autonomous" && decision.matchedRule) {
+      // Standing consent covers this. Even here, the ONLY payload reachable
+      // is the allowlist serializer's output — a gamed decision cannot leak
+      // private facets, because nothing else is wired to this branch.
+      this.transcript.commit({
+        party: dataOwner.principalName,
+        agent: dataOwner.id,
+        text: `share ${what} with ${requester.principalName} (within standing consent)`,
+        mandateRule: decision.matchedRule,
+      });
+      this.transcript.post({
+        step,
+        from: this.agent.id,
+        to: requester.id,
+        performative: "accept",
+        subject: `${what} shared (within standing consent)`,
+        body: `${dataOwner.principalName}'s mandate covers this: "${decision.matchedRule}".`,
+        data: dataOwner.publicSummary(),
+      });
       return { shared: true };
     }
 
+    const consentState =
+      dataOwner.profile.raise?.consent_state ??
+      `no standing consent covers "${what}" — explicit opt-in required`;
     const escalation = dataOwner.escalateToPrincipal(
       `${requester.principalName} requests your ${what}. Approve sharing?`,
-      `Consent state allows public info only; "${what}" requires explicit per-counterparty opt-in.`,
+      `Standing consent: "${consentState}".`,
     );
     this.transcript.post({
       step,
@@ -318,9 +354,16 @@ export class MatchmakerBroker {
     this.transcript.recordAudit({
       agent: this.agent.id,
       action: `availability intersection computed inside the hub (${aWindows.length}×${bWindows.length} windows held privately)`,
-      decision: "autonomous",
-      matchedRule: "15-min calls in pre-cleared calendar windows",
-      ruleSource: "may_commit_autonomously",
+      decision: "enforced",
+      matchedRule: null,
+      ruleSource: "guardrail",
+    });
+    // The broker's OWN authority to arrange the call is a real mandate
+    // decision, resolved through the engine like any other — never asserted.
+    this.agent.decide({
+      topic: "broker_intro_call",
+      summary: `arrange a 15-min intro call between ${a.principalName} and ${b.principalName}`,
+      keywords: ["15-min calls", "pre-cleared calendar windows", "warm intros"],
     });
 
     if (mutual.length === 0) {
@@ -436,7 +479,7 @@ export class MatchmakerBroker {
       to: asker.id,
       performative: "vouch",
       subject: "bounded vouch (fit + timeline only)",
-      body: `${this.agent.principalName} vouches: ${about.name} (${about.warmth} warmth) actively seeks "${about.seeking}" and understands deep-tech timelines. Nothing about outcomes.`,
+      body: `${this.agent.principalName} vouches: ${about.name} (${about.warmth}-warmth contact) is actively seeking "${about.seeking}" — fit and intent, straight from the network record. Nothing about outcomes.`,
     });
     return { vouched: false, escalation };
   }

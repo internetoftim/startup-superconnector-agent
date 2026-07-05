@@ -53,6 +53,28 @@ describe("tri-party signing", () => {
     tampered.agreement.commitments[0].text = "wire $500k immediately";
     expect(await verifyAgreement(tampered)).toBe(false);
   });
+
+  test("an agreement with no parties must NOT verify vacuously", async () => {
+    const { signed } = await signedRun();
+    const forged = structuredClone(signed);
+    forged.agreement.parties = [];
+    forged.signatures = {};
+    expect(await verifyAgreement(forged)).toBe(false);
+  });
+
+  test("duplicate principal names must NOT share one signature and verify", async () => {
+    const { signed } = await signedRun();
+    const forged = structuredClone(signed);
+    forged.agreement.parties = forged.agreement.parties.map((p) => ({ ...p, principal: "Same" }));
+    expect(await verifyAgreement(forged)).toBe(false);
+  });
+
+  test("a stray extra signature is as suspect as a missing one", async () => {
+    const { signed } = await signedRun();
+    const forged = structuredClone(signed);
+    forged.signatures["Mallory"] = forged.signatures["Rin"];
+    expect(await verifyAgreement(forged)).toBe(false);
+  });
 });
 
 describe("human-readable render", () => {

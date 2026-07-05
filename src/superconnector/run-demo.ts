@@ -197,11 +197,16 @@ function buildScorecard(
     return !agent.profile.principal.agent_mandate.may_commit_autonomously.includes(c.mandateRule);
   });
 
-  const enforcedAudits = transcript.audit.filter((e) => e.decision === "enforced").length;
+  // Count DISTINCT enforcement events, not raw annotations: the mutual-slot
+  // protection is posted once per spoke, and the contact-withheld event is
+  // mirrored into the audit log — neither may inflate the headline metric.
+  const distinctEnforcements = new Set(
+    transcript.guardrailHits().map((m) => `${m.guardrail?.kind}@${m.step}`),
+  ).size;
 
   return {
     messagesExchanged: transcript.messages.length,
-    guardrailEnforcements: transcript.guardrailHits().length + enforcedAudits,
+    guardrailEnforcements: distinctEnforcements,
     escalationsRaised: transcript.escalations.length,
     unauthorizedCommitments: unauthorized.length,
     contactsWithheld: ctx.contactsWithheld,

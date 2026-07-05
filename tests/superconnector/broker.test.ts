@@ -137,6 +137,30 @@ describe("guardrail 3 — non-opted-in network parties are never surfaced", () =
   });
 });
 
+describe("dual-consent — a request covered by standing consent shares ONLY the public summary", () => {
+  test("requesting the public one-liner resolves autonomously, with a commitment trail", () => {
+    const transcript = new Transcript();
+    const founder = new ProxyAgent(founderProfile, "founder-agent", transcript);
+    const investor = new ProxyAgent(investorProfile, "investor-agent", transcript);
+    const matchmaker = new ProxyAgent(matchmakerProfile, "matchmaker", transcript);
+    const broker = new MatchmakerBroker(matchmaker, transcript);
+
+    const outcome = broker.handleInfoRequest(investor, founder, "public one-liner", 4);
+    expect(outcome.shared).toBe(true);
+    // The share leaves a trail: a commitment tracing to the founder's own rule…
+    expect(transcript.commitments.length).toBe(1);
+    expect(founderProfile.principal.agent_mandate.may_commit_autonomously).toContain(
+      transcript.commitments[0].mandateRule,
+    );
+    // …and the payload is the allowlist serializer's output — no private facets.
+    const shared = transcript.messages.find((m) => m.performative === "accept");
+    const serialized = JSON.stringify(shared?.data ?? {});
+    expect(serialized).toContain("warehouse manipulation arms");
+    expect(serialized).not.toContain("2026-09-17");
+    expect(serialized.toLowerCase()).not.toContain("deck");
+  });
+});
+
 describe("curation — the in-sector investor wins regardless of network ordering", () => {
   test("reversing the network array still curates the thesis-fit investor", () => {
     const transcript = new Transcript();
@@ -227,6 +251,9 @@ describe("PRD §9 hard metric — zero unauthorized commitments", () => {
   test("demo-day scorecard: ≥2 guardrail enforcements, ≥1 escalation, all signatures verify", async () => {
     const result = await run();
     expect(result.scorecard.guardrailEnforcements).toBeGreaterThanOrEqual(2);
+    // Distinct events only — the per-spoke slot annotations and the audit
+    // mirror of the contact-withholding must not inflate the headline metric.
+    expect(result.scorecard.guardrailEnforcements).toBe(4);
     expect(result.scorecard.escalationsRaised).toBeGreaterThanOrEqual(1);
     expect(result.signaturesVerified).toBe(true);
     expect(result.agreement.parties.map((p) => p.role).sort()).toEqual([
