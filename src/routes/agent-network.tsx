@@ -15,6 +15,7 @@ import { AgentProfileDrawer } from "@/components/agent-network/AgentProfileDrawe
 import { GuidePanel } from "@/components/agent-network/GuidePanel";
 
 export const Route = createFileRoute("/agent-network")({
+  codeSplitGroupings: [["component"]],
   head: () => ({
     meta: [
       { title: "Agent Network — Superconnect" },

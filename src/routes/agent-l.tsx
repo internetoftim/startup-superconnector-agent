@@ -5,6 +5,7 @@ import { ProgressBar } from "@/components/agent-learning/ProgressBar";
 import { StatusRotator } from "@/components/agent-learning/StatusRotator";
 
 export const Route = createFileRoute("/agent-l")({
+  codeSplitGroupings: [["component"]],
   head: () => ({
     meta: [
       { title: "Building your AI agent — Superconnect" },
