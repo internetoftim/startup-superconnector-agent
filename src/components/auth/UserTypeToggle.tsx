@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Rocket, TrendingUp } from "lucide-react";
+import type { ReactNode } from "react";
 
 export type UserType = "startup" | "investor";
 
@@ -10,7 +11,7 @@ export function UserTypeToggle({
   value: UserType;
   onChange: (v: UserType) => void;
 }) {
-  const options: { value: UserType; label: string; icon: React.ReactNode }[] = [
+  const options: { value: UserType; label: string; icon: ReactNode }[] = [
     { value: "startup", label: "I'm a Startup", icon: <Rocket className="h-4 w-4" /> },
     { value: "investor", label: "I'm an Investor", icon: <TrendingUp className="h-4 w-4" /> },
   ];

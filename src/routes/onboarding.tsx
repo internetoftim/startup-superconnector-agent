@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import { ChatBubble } from "@/components/onboarding-chat/ChatBubble";
 import { TypingIndicator } from "@/components/onboarding-chat/TypingIndicator";
 import { QuickReplyChips } from "@/components/onboarding-chat/QuickReplyChips";
@@ -187,7 +188,7 @@ function OnboardingChat() {
     }, 1000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const v = input.trim();
     if (!v || typing || done || !current) return;
