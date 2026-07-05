@@ -47,12 +47,12 @@ const AgentNetworkRoute = AgentNetworkRouteImport.update({
   id: '/agent-network',
   path: '/agent-network',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/agent-network.lazy').then((d) => d.Route))
 const AgentLRoute = AgentLRouteImport.update({
   id: '/agent-l',
   path: '/agent-l',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/agent-l.lazy').then((d) => d.Route))
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
