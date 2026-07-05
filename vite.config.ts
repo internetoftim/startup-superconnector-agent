@@ -14,7 +14,10 @@ export default defineConfig({
     router: {
       // Avoid TanStack's route-code-splitting planner bug that surfaces as
       // `errors: [Getter/Setter]` after the client bundle is emitted.
-      codeSplittingOptions: { defaultBehavior: [] },
+      codeSplittingOptions: {
+        defaultBehavior: [],
+        splitBehavior: () => [],
+      },
     },
   },
 });
