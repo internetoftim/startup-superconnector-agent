@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Compass } from "lucide-react";
-import { AgentAvatar } from "@/components/agent-network/AgentAvatar";
+import { AgentAvatar } from "@/components/conversations/AgentAvatar";
 import { AgentBubble, InsightChip, TypingBubble } from "./AgentBubble";
 import { CompatibilityMeter } from "./CompatibilityMeter";
 import { MeetingProposalCard } from "./MeetingProposalCard";

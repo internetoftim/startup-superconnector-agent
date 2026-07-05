@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AgentAvatar } from "@/components/agent-network/AgentAvatar";
+import { AgentAvatar } from "@/components/conversations/AgentAvatar";
 import type { Conversation } from "@/lib/conversations-data";
 import { MY_AGENT } from "@/lib/conversations-data";
 import { Check, X, Sparkles } from "lucide-react";

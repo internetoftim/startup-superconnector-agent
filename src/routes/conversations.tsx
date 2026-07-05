@@ -1,6 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
 import { CONVERSATIONS } from "@/lib/conversations-data";
 import { ConversationList } from "@/components/conversations/ConversationList";
 import { TranscriptView } from "@/components/conversations/TranscriptView";
@@ -27,12 +26,7 @@ function ConversationsPage() {
   return (
     <main className="flex h-screen flex-col bg-background">
       <header className="flex items-center gap-3 border-b border-white/5 bg-background/80 px-4 py-2.5 backdrop-blur">
-        <Link
-          to="/agent-network"
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground transition hover:text-foreground"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" /> Back to network
-        </Link>
+        <div className="text-xs font-medium text-foreground">My Agent's Conversations</div>
         <div className="ml-auto text-[11px] text-muted-foreground">Superconnect</div>
       </header>
 
