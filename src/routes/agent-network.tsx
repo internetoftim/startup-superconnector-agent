@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Eye } from "lucide-react";
 import {
   INITIAL_FEED,
@@ -31,16 +31,21 @@ function AgentNetworkPage() {
   const [openAgent, setOpenAgent] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("feed");
-  const [liveIndex, setLiveIndex] = useState(0);
+  const liveIndexRef = useRef(0);
+  const liveSequenceRef = useRef(0);
 
   useEffect(() => {
     const t = setInterval(() => {
-      setLiveIndex((i) => {
-        const next = LIVE_POSTS[i % LIVE_POSTS.length];
-        const withNewId: FeedPostType = { ...next, id: `${next.id}-${Date.now()}` } as FeedPostType;
-        setFeed((f) => [withNewId, ...f]);
-        return i + 1;
-      });
+      const next = LIVE_POSTS[liveIndexRef.current % LIVE_POSTS.length];
+      liveIndexRef.current += 1;
+      liveSequenceRef.current += 1;
+
+      const withNewId: FeedPostType = {
+        ...next,
+        id: `${next.id}-${Date.now()}-${liveSequenceRef.current}`,
+      } as FeedPostType;
+
+      setFeed((f) => [withNewId, ...f]);
     }, 9000);
     return () => clearInterval(t);
   }, []);
