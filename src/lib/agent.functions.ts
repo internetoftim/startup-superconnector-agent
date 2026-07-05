@@ -60,7 +60,7 @@ export const generateAgentProfile = createServerFn({ method: "POST" })
       prompt: userMessage,
     });
 
-    let agentProfile: unknown;
+    let agentProfile: Record<string, unknown>;
     try {
       agentProfile = JSON.parse(stripFences(text));
     } catch {
@@ -69,7 +69,8 @@ export const generateAgentProfile = createServerFn({ method: "POST" })
 
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ agent_profile: agentProfile })
+      // agent_profile column is added by migration; types regenerate after approval
+      .update({ agent_profile: agentProfile } as never)
       .eq("id", userId);
 
     if (updateError) throw new Error(updateError.message);
