@@ -15,8 +15,6 @@ import { Route as ConversationsRouteImport } from './routes/conversations'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentProfileRouteImport } from './routes/agent-profile'
-import { Route as AgentNetworkRouteImport } from './routes/agent-network'
-import { Route as AgentLRouteImport } from './routes/agent-l'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -49,16 +47,6 @@ const AgentProfileRoute = AgentProfileRouteImport.update({
   path: '/agent-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AgentNetworkRoute = AgentNetworkRouteImport.update({
-  id: '/agent-network',
-  path: '/agent-network',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgentLRoute = AgentLRouteImport.update({
-  id: '/agent-l',
-  path: '/agent-l',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -67,8 +55,6 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/agent-l': typeof AgentLRoute
-  '/agent-network': typeof AgentNetworkRoute
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
@@ -78,8 +64,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/agent-l': typeof AgentLRoute
-  '/agent-network': typeof AgentNetworkRoute
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
@@ -90,8 +74,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/agent-l': typeof AgentLRoute
-  '/agent-network': typeof AgentNetworkRoute
   '/agent-profile': typeof AgentProfileRoute
   '/auth': typeof AuthRoute
   '/confirmation': typeof ConfirmationRoute
@@ -103,8 +85,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/agent-l'
-    | '/agent-network'
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
@@ -114,8 +94,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/agent-l'
-    | '/agent-network'
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
@@ -125,8 +103,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/agent-l'
-    | '/agent-network'
     | '/agent-profile'
     | '/auth'
     | '/confirmation'
@@ -137,8 +113,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AgentLRoute: typeof AgentLRoute
-  AgentNetworkRoute: typeof AgentNetworkRoute
   AgentProfileRoute: typeof AgentProfileRoute
   AuthRoute: typeof AuthRoute
   ConfirmationRoute: typeof ConfirmationRoute
@@ -191,20 +165,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/agent-network': {
-      id: '/agent-network'
-      path: '/agent-network'
-      fullPath: '/agent-network'
-      preLoaderRoute: typeof AgentNetworkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agent-l': {
-      id: '/agent-l'
-      path: '/agent-l'
-      fullPath: '/agent-l'
-      preLoaderRoute: typeof AgentLRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -217,8 +177,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AgentLRoute: AgentLRoute,
-  AgentNetworkRoute: AgentNetworkRoute,
   AgentProfileRoute: AgentProfileRoute,
   AuthRoute: AuthRoute,
   ConfirmationRoute: ConfirmationRoute,
@@ -229,13 +187,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
