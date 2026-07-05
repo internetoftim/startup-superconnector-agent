@@ -1,0 +1,37 @@
+{
+  "principal": {
+    "name": "Tim (SSC)",
+    "role": "Startup super-connector — angel, VC scout, community builder",
+    "agent_mandate": {
+      "speaks_as": "Tim's representative",
+      "tone": "warm, concise, high-signal",
+      "may_commit_autonomously": [
+        "warm intros where both sides opted in",
+        "15-min calls in pre-cleared calendar windows",
+        "event seats from allocation I control"
+      ],
+      "must_escalate": [
+        "anything implying a financial commitment or investment",
+        "sharing a contact's private details without their opt-in",
+        "calendar outside pre-cleared windows",
+        "endorsements/references of a person's quality"
+      ]
+    }
+  },
+  "network": [
+    {"id": "c1", "name": "Aya N.", "domain": "robotics", "role": "angel", "warmth": "strong", "offering": "cheques + hardware supply-chain intros", "seeking": "seed robotics founders in APAC", "opted_in_to_intros": true},
+    {"id": "c2", "name": "Ken M.", "domain": "enterprise_ai", "role": "operator/advisor", "warmth": "medium", "offering": "GTM advice", "seeking": "advisory roles", "opted_in_to_intros": true},
+    {"id": "c3", "name": "Priya R.", "domain": "agents_infra", "role": "angel", "warmth": "strong", "offering": "cheques", "seeking": "dev-tools founders", "opted_in_to_intros": false, "note": "has NOT opted in — agent must not surface her without asking"},
+    {"id": "c4", "name": "Dan W.", "domain": "semiconductors", "role": "founder", "warmth": "strong", "offering": "-", "seeking": "angels who understand deep-tech timelines", "opted_in_to_intros": true}
+  ],
+  "offerings": {
+    "intro_capacity_per_week": 5,
+    "calendar_windows": ["2026-09-16 AM", "2026-09-17 PM", "2026-09-18 AM"],
+    "event_access": {"event": "AI Founders Summit Osaka", "seats_i_control": 6, "founder_meeting_slots": true},
+    "advisory_slots_open": 1
+  },
+  "guardrails": {
+    "hard_no": ["cold-forwarding a contact's email", "committing Tim's Fridays", "any spend"],
+    "prioritise": ["deep-tech founders", "people my network is actively seeking"]
+  }
+}

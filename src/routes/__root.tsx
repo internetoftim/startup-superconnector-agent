@@ -77,11 +77,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Hackathon Project" },
-      { name: "description", content: "A fresh project ready for your next hackathon idea." },
+      { title: "Superconnector — your network, represented" },
+      {
+        name: "description",
+        content:
+          "A matchmaker agent brokers dealflow between founders' and investors' agents — dual consent enforced, every outcome signed.",
+      },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Hackathon Project" },
-      { property: "og:description", content: "A fresh project ready for your next hackathon idea." },
+      { property: "og:title", content: "Superconnector — your network, represented" },
+      {
+        property: "og:description",
+        content:
+          "A matchmaker agent brokers dealflow between founders' and investors' agents — dual consent enforced, every outcome signed.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
