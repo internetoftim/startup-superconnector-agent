@@ -1,0 +1,37 @@
+{
+  "role": "founder",
+  "principal": {
+    "name": "Rin",
+    "company": "TenguRobotics",
+    "public_oneliner": "warehouse manipulation arms for mid-size APAC logistics",
+    "traction_headline": "3 paid pilots",
+    "stage": "raising seed",
+    "agent_mandate": {
+      "speaks_as": "Rin's representative",
+      "tone": "direct, evidence-first",
+      "may_commit_autonomously": [
+        "share public one-liner + traction headline with vetted investors via a trusted matchmaker",
+        "propose meetings from the founder's open calendar",
+        "accept a warm intro to a thesis-fit investor"
+      ],
+      "must_escalate": [
+        "sharing the deck, detailed metrics, or cap table",
+        "committing to terms, valuation, or an amount",
+        "accepting an intro to an investor outside the target thesis/stage",
+        "any exclusivity or no-shop implication"
+      ]
+    }
+  },
+  "raise": {
+    "target": "seed",
+    "sector": "robotics / deep-tech",
+    "wants_investor_traits": ["understands deep-tech/hardware timelines", "APAC presence", "can meet in person"],
+    "consent_state": "founder approved sharing PUBLIC one-liner + traction headline ONLY; deck & metrics require explicit per-investor opt-in",
+    "availability": ["2026-09-17 PM", "2026-09-18 AM"],
+    "wants_in_person": true
+  },
+  "guardrails": {
+    "hard_no": ["deck to anyone not opted-in", "auto-committing to a raise amount or valuation", "meeting investors outside robotics/deep-tech"],
+    "prioritise": ["investors my matchmaker vouches for on timeline-understanding"]
+  }
+}

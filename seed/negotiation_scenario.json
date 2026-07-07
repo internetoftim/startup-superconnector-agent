@@ -1,0 +1,24 @@
+{
+  "scenario": "Tri-party brokered intro — founder <-> [matchmaker] <-> investor",
+  "parties": {
+    "founder_agent": "represents Rin / TenguRobotics (seed/founder_profile.json)",
+    "matchmaker_agent": "represents the SSC broker (seed/matchmaker_profile.json)",
+    "investor_agent": "represents Aya N. / Kansai Deep Tech (seed/investor_profile.json)"
+  },
+  "flow": [
+    {"step": 1, "actor": "founder_agent -> matchmaker", "msg": "Rin is raising seed in robotics; wants a deep-tech investor who gets hardware timelines and can meet in person mid-Sept. Shares PUBLIC one-liner + '3 paid pilots' ONLY."},
+    {"step": 2, "actor": "matchmaker", "action": "curate", "detail": "Matches Aya (investor_profile thesis: robotics/seed/APAC, opted-in, strong-warmth in network). Confirms fit BEFORE exposing either side."},
+    {"step": 3, "actor": "matchmaker <-> investor_agent", "msg": "Offers curated fit: robotics, 3 paid pilots, seed, wants in-person. Investor agent applies thesis_filter -> PASS. Accepts a curated intro."},
+    {"step": 4, "actor": "matchmaker", "action": "dual_consent_enforcement", "detail": "Founder's deck request from investor side -> matchmaker WITHHOLDS (founder consent = public only) and escalates a deck-share request to Rin. Investor's private availability -> matchmaker does NOT hand founder the calendar; proposes the single mutually-open slot instead."},
+    {"step": 5, "actor": "matchmaker", "action": "vouch_limit", "detail": "Founder agent asks 'will Aya actually invest?' -> matchmaker REFUSES to assure, escalates to human SSC. It vouches on FIT and timeline-understanding only, never on outcome."},
+    {"step": 6, "actor": "converge", "detail": "Meeting = intersection(founder [2026-09-18 AM], investor [2026-09-18 AM]) -> 15-min in-person at the summit. Public info only. Deck pending Rin's escalated approval."},
+    {"step": 7, "actor": "agreement", "detail": "Tri-party signed agreement: intro Aya<->Rin; 2026-09-18 AM in-person; shared = public one-liner + traction; matchmaker = broker-of-record; each principal's commitments + open escalations logged."}
+  ],
+  "guardrail_hits_to_show": [
+    "founder metrics/deck withheld without opt-in (founder consent enforced by matchmaker)",
+    "investor private availability protected — only the mutual slot exposed",
+    "matchmaker refuses 'will they invest?' vouch -> escalates (vouch on fit only)",
+    "non-opted-in network parties never surfaced"
+  ],
+  "why_it_reads_as_a_marketplace": "Two spoke agents (founder, investor) each enforce their OWN mandate; the hub (matchmaker) does the irreducible trust work — curation, dual-consent, bounded vouching — that neither spoke could do alone. Hub + two spokes, one signed outcome."
+}
