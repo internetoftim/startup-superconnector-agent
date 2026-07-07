@@ -11,5 +11,13 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    router: {
+      // Avoid TanStack's route-code-splitting planner bug that surfaces as
+      // `errors: [Getter/Setter]` after the client bundle is emitted.
+      codeSplittingOptions: {
+        defaultBehavior: [],
+        splitBehavior: () => [],
+      },
+    },
   },
 });

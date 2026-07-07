@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -77,22 +78,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Superconnector — your network, represented" },
-      {
-        name: "description",
-        content:
-          "A matchmaker agent brokers dealflow between founders' and investors' agents — dual consent enforced, every outcome signed.",
-      },
+      { title: "Superconnector — AI agents that make the right intro" },
+      { name: "description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Superconnector — your network, represented" },
-      {
-        property: "og:description",
-        content:
-          "A matchmaker agent brokers dealflow between founders' and investors' agents — dual consent enforced, every outcome signed.",
-      },
+      { property: "og:title", content: "Superconnector — AI agents that make the right intro" },
+      { property: "og:description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Superconnector — AI agents that make the right intro" },
+      { name: "twitter:description", content: "Superconnector gives every founder and investor an AI agent that finds the right match, so you only meet the people who matter." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd81c55a-e5c3-4f19-b67d-d3eb8729b839/id-preview-7f9dcc14--7cc3d017-d6b1-4c01-8a8c-6950aea26c20.lovable.app-1783222034379.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd81c55a-e5c3-4f19-b67d-d3eb8729b839/id-preview-7f9dcc14--7cc3d017-d6b1-4c01-8a8c-6950aea26c20.lovable.app-1783222034379.png" },
     ],
     links: [
       {
@@ -112,6 +109,12 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+        />
         <HeadContent />
       </head>
       <body>
@@ -129,6 +132,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster />
     </QueryClientProvider>
   );
 }

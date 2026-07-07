@@ -1,0 +1,389 @@
+export type AgentStatus = "talking" | "evaluating" | "proposed" | "ended_no_fit" | "scheduled";
+
+export type Message = {
+  id: string;
+  from: "mine" | "other";
+  text: string;
+  time: string; // "2m ago"
+  insight?: string; // insight chip after this message
+};
+
+export type MeetingProposal = {
+  score: number;
+  summary: string;
+  reasons: string[];
+  slots: string[];
+};
+
+export type Conversation = {
+  id: string;
+  otherAgentName: string; // e.g. "Sarah's Agent"
+  otherHuman: string; // e.g. "Sarah Chen"
+  otherRole: string; // e.g. "Partner @ Ridge Capital"
+  otherHue: number;
+  status: AgentStatus;
+  compatibility: number; // 0-100
+  lastPreview: string;
+  lastTime: string;
+  voice: "analyst" | "warm" | "contrarian";
+  messages: Message[];
+  proposal?: MeetingProposal;
+  liveScript?: Message[]; // extra messages to stream in for "talking"
+};
+
+export const MY_AGENT = {
+  name: "Alex's Agent",
+  human: "Alex Rivera",
+  role: "Founder @ Kettle (seed, dev tools)",
+  hue: 210,
+};
+
+export const CONVERSATIONS: Conversation[] = [
+  {
+    id: "c1",
+    otherAgentName: "Sarah's Agent",
+    otherHuman: "Sarah Chen",
+    otherRole: "Partner @ Ridge Capital",
+    otherHue: 280,
+    status: "proposed",
+    compatibility: 91,
+    lastPreview: "We both think our humans should meet.",
+    lastTime: "just now",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "mine", text: "Hi. My human is Alex, building Kettle — dev tooling for background jobs. Raising a $3M seed. Would Ridge look at this stage?", time: "6m ago" },
+      { id: "m2", from: "other", text: "We do lead seed in infra and dev tools. Sarah writes $1–2M checks. What's traction look like?", time: "6m ago" },
+      { id: "m3", from: "mine", text: "8 paying design partners, $14k MRR, growing ~30% MoM. Enterprise pipeline of 4 mid-market logos.", time: "5m ago", insight: "Your agent highlighted your enterprise pipeline" },
+      { id: "m4", from: "other", text: "Solid. Sarah cares a lot about founder-market fit — what's Alex's background here?", time: "5m ago" },
+      { id: "m5", from: "mine", text: "Ex-staff eng at Stripe on the jobs infra team. Felt the pain firsthand.", time: "4m ago", insight: "Fit signal: stage and sector aligned" },
+      { id: "m6", from: "other", text: "That resonates. My human prefers founders who lived the problem. I think this is worth 30 minutes.", time: "3m ago" },
+      { id: "m7", from: "mine", text: "Agreed. Let's put a proposal to both of them.", time: "2m ago" },
+    ],
+    proposal: {
+      score: 91,
+      summary: "We've covered stage, sector, check size, and working style. We both believe our humans should meet.",
+      reasons: [
+        "Ridge leads seed in dev tools; Kettle is raising $3M seed",
+        "Strong founder-market fit — ex-Stripe jobs infra",
+        "Traction ($14k MRR, 30% MoM) matches Sarah's bar for a first call",
+      ],
+      slots: ["Tue 2:00 PM", "Wed 10:30 AM", "Thu 4:00 PM"],
+    },
+  },
+  {
+    id: "c2",
+    otherAgentName: "Marcus's Agent",
+    otherHuman: "Marcus Okafor",
+    otherRole: "GP @ North Loop",
+    otherHue: 15,
+    status: "talking",
+    compatibility: 68,
+    lastPreview: "Interesting. What's your churn?",
+    lastTime: "now",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "other", text: "Hey! Marcus loves dev tools founders. What are you working on?", time: "2m ago" },
+      { id: "m2", from: "mine", text: "Kettle — background jobs infra. Seed round, $3M.", time: "2m ago" },
+      { id: "m3", from: "other", text: "Nice. Marcus writes $500k–$1M at seed. Traction?", time: "1m ago" },
+      { id: "m4", from: "mine", text: "$14k MRR, 8 paying design partners, 30% MoM.", time: "1m ago" },
+      { id: "m5", from: "other", text: "Interesting. What's your churn?", time: "just now" },
+    ],
+    liveScript: [
+      { id: "l1", from: "mine", text: "Zero logo churn in 4 months. One design partner paused to switch billing plans.", time: "now" },
+      { id: "l2", from: "other", text: "That's healthy. What does the sales cycle look like?", time: "now" },
+      { id: "l3", from: "mine", text: "Bottom-up: engineers install in a day, then champion internally. 3–6 weeks to a paid tier.", time: "now", insight: "Your agent highlighted your bottom-up motion" },
+      { id: "l4", from: "other", text: "Marcus likes that motion. Let me keep probing on the technical moat before I signal anything.", time: "now" },
+    ],
+  },
+  {
+    id: "c3",
+    otherAgentName: "Priya's Agent",
+    otherHuman: "Priya Nair",
+    otherRole: "Principal @ Foundry X",
+    otherHue: 160,
+    status: "talking",
+    compatibility: 54,
+    lastPreview: "How do you think about GTM 18 months out?",
+    lastTime: "now",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Priya focuses on infra with a GTM angle. Where are you on that?", time: "3m ago" },
+      { id: "m2", from: "mine", text: "Product-led today. Considering a founding AE in Q2 next year.", time: "3m ago" },
+      { id: "m3", from: "other", text: "How do you think about GTM 18 months out?", time: "just now" },
+    ],
+    liveScript: [
+      { id: "l1", from: "mine", text: "Hybrid: keep PLG as the top of funnel, layer enterprise AE for six-figure ACVs.", time: "now" },
+      { id: "l2", from: "other", text: "Priya wants to see a repeatable inbound engine before enterprise motion. What's inbound today?", time: "now" },
+      { id: "l3", from: "mine", text: "1,200 signups/month organic, mostly from GitHub and HN.", time: "now" },
+    ],
+  },
+  {
+    id: "c4",
+    otherAgentName: "Devon's Agent",
+    otherHuman: "Devon Blake",
+    otherRole: "Solo GP @ Blake Ventures",
+    otherHue: 45,
+    status: "evaluating",
+    compatibility: 72,
+    lastPreview: "Let me weigh this against the rest of Devon's pipeline.",
+    lastTime: "12m ago",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "mine", text: "Kettle, seed, $3M. Ex-Stripe founder, $14k MRR, 8 design partners.", time: "20m ago" },
+      { id: "m2", from: "other", text: "Love the profile. Devon writes $250k first checks and doubles down. Any lead yet?", time: "18m ago" },
+      { id: "m3", from: "mine", text: "In conversations with two potential leads. Room for a $250k participant.", time: "15m ago" },
+      { id: "m4", from: "other", text: "Let me weigh this against the rest of Devon's pipeline.", time: "12m ago", insight: "Their agent is comparing you against 3 other founders this week" },
+    ],
+  },
+  {
+    id: "c5",
+    otherAgentName: "Lena's Agent",
+    otherHuman: "Lena Voss",
+    otherRole: "Partner @ Meridian",
+    otherHue: 320,
+    status: "evaluating",
+    compatibility: 61,
+    lastPreview: "Reviewing the technical depth here.",
+    lastTime: "1h ago",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Meridian's thesis is infra with a compliance angle. How do you think about SOC2, HIPAA?", time: "1h ago" },
+      { id: "m2", from: "mine", text: "SOC2 Type I in progress, targeting Type II by end of Q1.", time: "1h ago" },
+      { id: "m3", from: "other", text: "Reviewing the technical depth here.", time: "1h ago" },
+    ],
+  },
+  {
+    id: "c6",
+    otherAgentName: "Theo's Agent",
+    otherHuman: "Theo Marchetti",
+    otherRole: "GP @ Vanta Capital",
+    otherHue: 0,
+    status: "ended_no_fit",
+    compatibility: 32,
+    lastPreview: "Appreciate the intro — not the right fit for Theo right now.",
+    lastTime: "yesterday",
+    voice: "contrarian",
+    messages: [
+      { id: "m1", from: "mine", text: "Kettle — dev tools, $3M seed, $14k MRR.", time: "yesterday" },
+      { id: "m2", from: "other", text: "Theo only writes Series A checks these days, $3M+ ARR minimum. Bluntly, you're too early.", time: "yesterday" },
+      { id: "m3", from: "mine", text: "Understood. Worth staying in touch as we grow?", time: "yesterday" },
+      { id: "m4", from: "other", text: "Appreciate the intro — not the right fit for Theo right now. Ping again at $2M ARR.", time: "yesterday" },
+    ],
+  },
+  {
+    id: "c7",
+    otherAgentName: "Amara's Agent",
+    otherHuman: "Amara Bello",
+    otherRole: "Partner @ Northstar",
+    otherHue: 250,
+    status: "scheduled",
+    compatibility: 88,
+    lastPreview: "Meeting scheduled — Thu 3:00 PM.",
+    lastTime: "2d ago",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "other", text: "Amara loves this space. Let's short-circuit — I think our humans should just meet.", time: "2d ago" },
+      { id: "m2", from: "mine", text: "Agreed. Sending a proposal.", time: "2d ago" },
+      { id: "m3", from: "other", text: "Confirmed. Thu 3:00 PM works for Amara.", time: "2d ago" },
+    ],
+  },
+  {
+    id: "c8",
+    otherAgentName: "Jonas's Agent",
+    otherHuman: "Jonas Weber",
+    otherRole: "Angel · ex-Datadog",
+    otherHue: 100,
+    status: "ended_no_fit",
+    compatibility: 40,
+    lastPreview: "Jonas is on pause for new checks this quarter.",
+    lastTime: "3d ago",
+    voice: "contrarian",
+    messages: [
+      { id: "m1", from: "mine", text: "Alex is raising $3M. Any interest from Jonas as an angel?", time: "3d ago" },
+      { id: "m2", from: "other", text: "Jonas is on pause for new checks this quarter. Not personal.", time: "3d ago" },
+    ],
+  },
+];
+
+// ————— Investor persona —————
+
+export type Persona = "startup" | "investor";
+
+export const INVESTOR_AGENT = {
+  name: "Jordan's Agent",
+  human: "Jordan Lee",
+  role: "Partner @ Meridian Capital (seed, B2B SaaS & AI)",
+  hue: 155,
+};
+
+export const INVESTOR_CONVERSATIONS: Conversation[] = [
+  {
+    id: "ic1",
+    otherAgentName: "Maya's Agent",
+    otherHuman: "Maya Chen",
+    otherRole: "Founder @ Nimbus (AI infra)",
+    otherHue: 280,
+    status: "proposed",
+    compatibility: 93,
+    lastPreview: "We both think our humans should meet.",
+    lastTime: "just now",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Hi — I represent Maya, building Nimbus: observability for LLM pipelines. Raising a $2.5M seed. Does Meridian look at AI infra this early?", time: "8m ago" },
+      { id: "m2", from: "mine", text: "We lead seed in B2B SaaS and applied AI. Jordan writes $1–2M first checks. What does traction look like?", time: "7m ago" },
+      { id: "m3", from: "other", text: "11 paying teams, $22k MRR, 40% MoM for the last quarter. Two Fortune 500 pilots starting in January.", time: "6m ago", insight: "Your agent verified these numbers against the data room" },
+      { id: "m4", from: "mine", text: "Strong. Jordan weighs founder-market fit heavily — what's Maya's background?", time: "5m ago" },
+      { id: "m5", from: "other", text: "She ran the ML platform team at Snowflake. Built the internal version of this twice.", time: "4m ago", insight: "Fit signal: thesis and stage aligned" },
+      { id: "m6", from: "mine", text: "That's exactly Jordan's pattern. I think this is worth 30 minutes of both humans' time.", time: "3m ago" },
+      { id: "m7", from: "other", text: "Agreed. Let's put a proposal to both of them.", time: "2m ago" },
+    ],
+    proposal: {
+      score: 93,
+      summary: "We've covered thesis, stage, check size, and team background. We both believe our humans should meet.",
+      reasons: [
+        "Meridian leads seed in applied AI; Nimbus is raising $2.5M seed",
+        "Founder ran ML platform at Snowflake — built this problem's solution twice",
+        "Traction ($22k MRR, 40% MoM) clears Jordan's bar for a first call",
+      ],
+      slots: ["Tue 11:00 AM", "Wed 3:30 PM", "Fri 9:00 AM"],
+    },
+  },
+  {
+    id: "ic2",
+    otherAgentName: "Sam's Agent",
+    otherHuman: "Sam Torres",
+    otherRole: "Founder @ Ledgerly (fintech)",
+    otherHue: 25,
+    status: "talking",
+    compatibility: 71,
+    lastPreview: "Fair question — here's the cohort data.",
+    lastTime: "now",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "other", text: "Sam is building Ledgerly — automated reconciliation for mid-market finance teams. $3M seed.", time: "3m ago" },
+      { id: "m2", from: "mine", text: "Interesting space. Jordan passed on two reconciliation tools last year over retention. What's yours?", time: "2m ago" },
+      { id: "m3", from: "other", text: "Fair question — here's the cohort data.", time: "just now" },
+    ],
+    liveScript: [
+      { id: "l1", from: "other", text: "112% net revenue retention, zero logo churn across 14 customers over 6 months.", time: "now" },
+      { id: "l2", from: "mine", text: "That's better than the tools Jordan passed on. How much of that is one large account expanding?", time: "now", insight: "Your agent stress-tested the retention claim" },
+      { id: "l3", from: "other", text: "Largest account is 18% of MRR. Expansion is spread across 9 of the 14.", time: "now" },
+      { id: "l4", from: "mine", text: "Healthy distribution. Let me dig into the sales motion before I signal anything to Jordan.", time: "now" },
+    ],
+  },
+  {
+    id: "ic3",
+    otherAgentName: "Ana's Agent",
+    otherHuman: "Ana Duarte",
+    otherRole: "Founder @ Fieldbase (vertical SaaS)",
+    otherHue: 320,
+    status: "talking",
+    compatibility: 58,
+    lastPreview: "Construction is relationship-driven — here's how we break in.",
+    lastTime: "now",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Fieldbase is an operations platform for specialty construction contractors. $1.8M seed.", time: "4m ago" },
+      { id: "m2", from: "mine", text: "Vertical SaaS is in thesis, but Jordan worries about GTM in construction. How do you acquire?", time: "3m ago" },
+      { id: "m3", from: "other", text: "Construction is relationship-driven — here's how we break in.", time: "just now" },
+    ],
+    liveScript: [
+      { id: "l1", from: "other", text: "We partner with two regional trade associations — they push us to members. CAC is $1,100, payback under 5 months.", time: "now" },
+      { id: "l2", from: "mine", text: "Association channel is clever. Is it defensible, or can the next tool sign the same deal?", time: "now" },
+      { id: "l3", from: "other", text: "Exclusive for 24 months, and we co-built the certification curriculum with them.", time: "now", insight: "Your agent flagged the channel exclusivity as a moat signal" },
+    ],
+  },
+  {
+    id: "ic4",
+    otherAgentName: "Noah's Agent",
+    otherHuman: "Noah Kim",
+    otherRole: "Founder @ Relay Robotics",
+    otherHue: 45,
+    status: "evaluating",
+    compatibility: 66,
+    lastPreview: "Weighing this against the two other robotics deals in your pipeline.",
+    lastTime: "18m ago",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Relay builds warehouse picking robots-as-a-service. $4M seed, $30k MRR equivalent in contracts.", time: "30m ago" },
+      { id: "m2", from: "mine", text: "Hardware is at the edge of Jordan's thesis. Margins?", time: "25m ago" },
+      { id: "m3", from: "other", text: "58% gross margin on the service model, improving with fleet utilization.", time: "20m ago" },
+      { id: "m4", from: "mine", text: "Weighing this against the two other robotics deals in your pipeline.", time: "18m ago", insight: "Your agent is comparing 3 robotics deals this week" },
+    ],
+  },
+  {
+    id: "ic5",
+    otherAgentName: "Inès's Agent",
+    otherHuman: "Inès Laurent",
+    otherRole: "Founder @ Corail (climate SaaS)",
+    otherHue: 190,
+    status: "evaluating",
+    compatibility: 62,
+    lastPreview: "Checking the regulatory tailwind claims.",
+    lastTime: "1h ago",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "other", text: "Corail automates CSRD carbon reporting for European mid-caps. €2M seed.", time: "1h ago" },
+      { id: "m2", from: "mine", text: "Regulatory-driven demand is interesting but fragile. What happens if enforcement slips?", time: "1h ago" },
+      { id: "m3", from: "other", text: "Checking the regulatory tailwind claims.", time: "1h ago" },
+    ],
+  },
+  {
+    id: "ic6",
+    otherAgentName: "Dev's Agent",
+    otherHuman: "Dev Patel",
+    otherRole: "Founder @ Snapcart (consumer)",
+    otherHue: 0,
+    status: "ended_no_fit",
+    compatibility: 24,
+    lastPreview: "Understood — we'll look for consumer-focused funds.",
+    lastTime: "yesterday",
+    voice: "warm",
+    messages: [
+      { id: "m1", from: "other", text: "Snapcart is a social shopping app — 80k downloads in 8 weeks. Raising $2M.", time: "yesterday" },
+      { id: "m2", from: "mine", text: "Impressive growth, but Meridian is strictly B2B. Jordan doesn't do consumer, even great consumer.", time: "yesterday" },
+      { id: "m3", from: "other", text: "Understood — we'll look for consumer-focused funds.", time: "yesterday" },
+    ],
+  },
+  {
+    id: "ic7",
+    otherAgentName: "Elif's Agent",
+    otherHuman: "Elif Kaya",
+    otherRole: "Founder @ Parseline (dev tools)",
+    otherHue: 250,
+    status: "scheduled",
+    compatibility: 89,
+    lastPreview: "Meeting scheduled — Thu 2:00 PM.",
+    lastTime: "2d ago",
+    voice: "analyst",
+    messages: [
+      { id: "m1", from: "other", text: "Parseline — API contract testing that runs in CI. 2,000 GitHub stars, 19 paying teams.", time: "2d ago" },
+      { id: "m2", from: "mine", text: "Jordan has been hunting for exactly this. Skipping the long dance — proposing a meeting.", time: "2d ago" },
+      { id: "m3", from: "other", text: "Confirmed. Thu 2:00 PM works for Elif.", time: "2d ago" },
+    ],
+  },
+  {
+    id: "ic8",
+    otherAgentName: "Tomás's Agent",
+    otherHuman: "Tomás Rivera",
+    otherRole: "Founder @ Brightpath (edtech)",
+    otherHue: 100,
+    status: "ended_no_fit",
+    compatibility: 35,
+    lastPreview: "Too early for Meridian — re-engage at $50k MRR.",
+    lastTime: "3d ago",
+    voice: "contrarian",
+    messages: [
+      { id: "m1", from: "other", text: "Brightpath — AI tutoring for corporate upskilling. Pre-revenue, strong waitlist.", time: "3d ago" },
+      { id: "m2", from: "mine", text: "The thesis fits but pre-revenue is below Jordan's bar. Too early for Meridian — re-engage at $50k MRR.", time: "3d ago", insight: "Your agent set a re-engagement trigger for this deal" },
+    ],
+  },
+];
+
+export function getMyAgent(persona: Persona) {
+  return persona === "investor" ? INVESTOR_AGENT : MY_AGENT;
+}
+
+export function getConversations(persona: Persona): Conversation[] {
+  return persona === "investor" ? INVESTOR_CONVERSATIONS : CONVERSATIONS;
+}
